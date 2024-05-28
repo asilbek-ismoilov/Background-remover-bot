@@ -17,7 +17,7 @@ packaging==24.0
 pydantic==2.5.3
 pydantic_core==2.14.6
 python-dotenv==1.0.1
-requests==2.31.0
+requests==2.32.2
 typing_extensions==4.10.0
 urllib3==2.2.1
 yarl==1.9.4

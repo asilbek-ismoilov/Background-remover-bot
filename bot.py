@@ -11,12 +11,12 @@ from menucommands.set_bot_commands  import set_default_commands
 from baza.sqlite import Database
 from filters.admin import IsBotAdminFilter
 from filters.check_sub_channel import IsCheckSubChannels
-from buttons import admin_keyboard, removebg
-from aiogram.fsm.context import FSMContext #new
+from keyboard_buttons import admin_keyboard, removebg
+from keyboard_buttons.inlinebuttonss import colors_button
+# from keyboard_buttons. import
+from aiogram.fsm.context import FSMContext 
 from states.reklama import Adverts
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-# from buttons.removebg import remove_bg
-from buttons.inlinebuttonss import colors_button
 import time 
 
 ADMINS = config.ADMINS
@@ -26,15 +26,31 @@ CHANNELS = config.CHANNELS
 dp = Dispatcher()
 
 
+
+
 @dp.message(CommandStart())
 async def start_command(message:Message):
     full_name = message.from_user.full_name
     telegram_id = message.from_user.id
     try:
         db.add_user(full_name=full_name,telegram_id=telegram_id) #foydalanuvchi bazaga qo'shildi
-        await message.answer(text="Assalomu alaykum,{full_name}\nBu bot rasm orqa fonini o'chirib beradi. \nBotdan foydalanish uchun rasm yuboring❗️❗️❗️")
+        await message.answer(text="Assalomu alaykum, botimizga hush kelibsiz")
     except:
-        await message.answer(text="Assalomu alaykum, rasm yuboring❗️❗️❗️")
+        await message.answer(text="Assalomu alaykum")
+
+
+@dp.message(IsCheckSubChannels())
+async def kanalga_obuna(message:Message):
+    text = ""
+    inline_channel = InlineKeyboardBuilder()
+    for index,channel in enumerate(CHANNELS):
+        ChatInviteLink = await bot.create_chat_invite_link(channel)
+        inline_channel.add(InlineKeyboardButton(text=f"{index+1}-kanal",url=ChatInviteLink.invite_link))
+    inline_channel.adjust(1,repeat=True)
+    button = inline_channel.as_markup()
+    await message.answer(f"{text} kanallarga azo bo'ling",reply_markup=button)
+
+
 
 #help commands
 @dp.message(Command("help"))
@@ -95,10 +111,12 @@ async def name(message:Message):
 
     await message.answer_photo(photo=file_id,reply_markup=colors_button)
         # await message.answer_photo(photo=types.input_file.BufferedInputFile(rasm,filename="no-bg.png"))
+    
 
 @dp.message()
 async def text_message(message:Message):
     message.answer("Iltimos, rasm yuboring❗️❗️❗️")
+    
 # black
 @dp.callback_query(F.data=="black")
 async def black_handler(callback:CallbackQuery):
@@ -172,18 +190,6 @@ async def green_handler(callback:CallbackQuery):
     rasm = removebg.remove_bg(photos_url,"green")
     await callback.message.answer_photo(photo=types.input_file.BufferedInputFile(rasm,filename="no-bg.png"),reply_markup=colors_button)
     await callback.message.delete()
-
-
-@dp.message(IsCheckSubChannels())
-async def kanalga_obuna(message:Message):
-    text = ""
-    inline_channel = InlineKeyboardBuilder()
-    for index,channel in enumerate(CHANNELS):
-        ChatInviteLink = await bot.create_chat_invite_link(channel)
-        inline_channel.add(InlineKeyboardButton(text=f"{index+1}-kanal",url=ChatInviteLink.invite_link))
-    inline_channel.adjust(1,repeat=True)
-    button = inline_channel.as_markup()
-    await message.answer(f"{text} kanallarga azo bo'ling",reply_markup=button)
 
 
 
